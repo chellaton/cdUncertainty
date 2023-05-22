@@ -1,0 +1,46 @@
+---
+title: "Assessing Uncertainty"
+author: "Ramesh Chellaton"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+```{r}
+set.seed(1)
+myColors <- c('steelblue','seagreen','salmon1')
+Outcome <- c('worked','did not work')
+```
+
+```{r simulate null}
+nsim <- 10000
+
+diffArray <- numeric()
+
+for (i in 1:nsim) {
+  result_new <- sample(Outcome, 52, replace = TRUE, prob = c(.5,.5))
+  # result_new
+  p_worked_new <- mean(result_new == 'worked')
+  # p_worked_new
+  
+  result_old <- sample(Outcome, 51, replace = TRUE, prob = c(.5,.5))
+  p_worked_old <- mean(result_old == 'worked')
+  diffArray[i] <- p_worked_new - p_worked_old
+}
+```
+
+Below is a histogram of difference in means over the simulation.
+And the percentage of times when the means differed by at least 10%.
+```{r histogram}
+hist(diffArray, breaks = 30)
+
+print(paste('The percentage of samples where means were off by at least 10% is',
+            100*mean(diffArray < -0.1 | diffArray > 0.1), '%'))
+
+cutoff1 <- quantile(diffArray, prob = 0.95)
+cutoff2 <- quantile(diffArray, probs = c(0.025, 0.975))
+abline(v=cutoff1, col = 'red', lwd=1)
+abline(v=cutoff2, col = 'steelblue', lwd=0.5)
+```
